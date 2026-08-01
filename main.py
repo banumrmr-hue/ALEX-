@@ -30,6 +30,7 @@ def reset_password(reset_link):
     except Exception as e:
         return False, f"Error opening link: {e}"
 
+    # 🔥 CHANGE: html.parser use karo (lxml ki jagah)
     soup = BeautifulSoup(resp.text, 'html.parser')
     
     csrf_token = None
@@ -77,7 +78,6 @@ def reset_password(reset_link):
     else:
         return True, new_pass
 
-# ---------- Telegram Bot Handlers ----------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🤖 Hello! Send me a password reset link, and I'll set a random password.\n\n"
@@ -107,13 +107,11 @@ async def handle_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text(f"❌ Password change failed:\n\n{result}")
 
-# ---------- Main Function ----------
 def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_link))
     
-    # Render.com पर Webhook mode में चलेगा
     if os.environ.get("RENDER"):
         print("Bot running in Webhook mode...")
         app.run_webhook(
